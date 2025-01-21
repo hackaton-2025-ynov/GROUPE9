@@ -75,4 +75,16 @@ router.post('/login', async (req, res) => {
   }
 });
 
+
+
+router.get('/test-db', async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.json(users);
+  } catch (error) {
+    console.error('Erreur de connexion DB :', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 module.exports = router;

@@ -1,16 +1,11 @@
 const express = require('express');
 const sequelize = require('../config/db');
-const authMiddleware = require('../middleware/authMiddleware'); // Si nécessaire
-
+const authMiddleware = require('../middleware/authMiddleware');
 const router = express.Router();
 
 // Récupérer les informations utilisateur
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   console.log('Requête reçue pour /profile avec session :', req.session);
-
-  if (!req.session.userId) {
-    return res.status(401).json({ error: 'Non autorisé' });
-  }
 
   try {
     const [results] = await sequelize.query(
@@ -28,12 +23,8 @@ router.get('/', async (req, res) => {
 });
 
 // Mettre à jour les informations utilisateur
-router.put('/update', async (req, res) => {
+router.put('/update', authMiddleware, async (req, res) => {
   const { nom_utilisateur, email, mot_de_passe } = req.body;
-
-  if (!req.session || !req.session.userId) {
-    return res.status(401).json({ error: 'Non autorisé.' });
-  }
 
   try {
     await sequelize.query(

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Profile() {
   const [nomUtilisateur, setNomUtilisateur] = useState('');
@@ -6,6 +7,8 @@ function Profile() {
   const [motDePasse, setMotDePasse] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
   const fetchUserData = async () => {
     try {
       const response = await fetch('/profile', {
@@ -13,57 +16,29 @@ function Profile() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
       });
-      console.log("response", response)
-      setIsLoading(false);
+      
 
       if (response.ok) {
         const data = await response.json();
         setNomUtilisateur(data.nom_utilisateur);
         setEmail(data.email);
       } else if (response.status === 401) {
-
-        window.location.href = '/login';
+        navigate('/login');
       } else {
         console.error('Erreur lors de la récupération des données utilisateur.');
-        setError('Erreur lors de la récupération des données utilisateur.');
+        setError('Erreur lors de la récupération des données utilisateur.');      }
+      } catch (error) {
+        console.error('Erreur réseau ou serveur :', error);
+        setError('Erreur réseau ou serveur.');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      //console.error('Erreur réseau ou serveur :', error);
-      //setError('Erreur réseau ou serveur.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  // Récupérer les informations utilisateur au chargement
-  useEffect(async () => {
-    await fetchUserData();
+    };
+
+  useEffect(() => {
+    fetchUserData();
   }, []);
 
-  // const fetchUserData = async () => {
-  //   try {
-  //     const response = await fetch('/profile', {
-  //       method: 'GET',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       credentials: 'include',
-  //     });
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setNomUtilisateur(data.nom_utilisateur);
-  //       setEmail(data.email);
-  //       localStorage.setItem('userData', JSON.stringify(data));
-  //       setIsLoading(false);
-  //     } else {
-  //       setError('Erreur lors de la récupération des données utilisateur.');
-  //       setIsLoading(false);
-  //     }
-  //   } catch (error) {
-  //     setError('Erreur réseau ou serveur.');
-  //     setIsLoading(false);
-  //   }
-  // };
-
-
-  // Mettre à jour les informations utilisateur
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -86,7 +61,6 @@ function Profile() {
       console.error('Erreur :', error);
     }
   };
-
 
   if (error) {
     return <p>{error}</p>;
